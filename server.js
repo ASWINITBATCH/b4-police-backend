@@ -1,4 +1,3 @@
-// server.js — Main Express server for B4 Police Station API
 require("dotenv").config();
 const express      = require("express");
 const cors         = require("cors");
@@ -7,6 +6,9 @@ const rateLimit    = require("express-rate-limit");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
+
+// ── Trust proxy (required for Railway) ─────────────────────────────
+app.set("trust proxy", 1);
 
 // ── Security ────────────────────────────────────────────────────────
 app.use(helmet());
@@ -25,11 +27,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // ── Rate Limiting ───────────────────────────────────────────────────
 app.use("/api/", rateLimit({
-  windowMs: 15 * 60 * 1000, max: 300,
+  windowMs: 15 * 60 * 1000,
+  max: 300,
   message: { error: "Too many requests. Please try again in 15 minutes." }
 }));
 app.use("/api/auth/login", rateLimit({
-  windowMs: 15 * 60 * 1000, max: 20,
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   message: { error: "Too many login attempts. Please wait 15 minutes." }
 }));
 
@@ -45,7 +49,7 @@ app.get("/api/health", (req, res) => {
   res.json({
     status:    "ok",
     station:   process.env.STATION_NAME || "B4 Police Station",
-    version:   "9.0",
+    version:   "10.0",
     timestamp: new Date().toISOString(),
   });
 });
