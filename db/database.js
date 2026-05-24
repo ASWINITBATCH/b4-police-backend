@@ -1,27 +1,27 @@
-// db/database.js — PostgreSQL connection pool
 const { Pool } = require("pg");
 require("dotenv").config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === "production"
-    ? { rejectUnauthorized: false }
-    : false,
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes("railway.internal")
+    ? false
+    : process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : false,
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 5000,
 });
 
 pool.on("error", (err) => {
   console.error("PostgreSQL pool error:", err);
 });
 
-// Test connection on startup
-pool.query("SELECT NOW()", (err) => {
+pool.query("SELECT NOW()", (err, res) => {
   if (err) {
     console.error("❌ Database connection failed:", err.message);
   } else {
-    console.log("✅ Database connected successfully");
+    console.log("✅ Database connected successfully at", res.rows[0].now);
   }
 });
 
